@@ -1,12 +1,13 @@
-#ifndef INTAKE_HPP__
-#define INTAKE_HPP__
+#ifndef INTAKE_HPP_
+#define INTAKE_HPP_
 
 #include "pros/motors.hpp"
 #include "pros/adi.hpp"
 
 // Intake controls the initial expansion of the collection mechanism as 
 // well as whether or not the flywheel (s) spin
-// 
+// Intake expects one motor that drives the flywheel and one solenoid
+// which drives the expansion / collapse of the assembly
 class Intake {
     // Change value based on testing. Speeds for flywheel on or off
     enum SPEED_SETTING {OFF = 0, ON = 100};
@@ -37,4 +38,4 @@ class Intake {
         pros::adi::Pneumatics pneumatic_;
 };
 
-#endif //INTAKE_HPP__
+#endif //INTAKE_HPP_
