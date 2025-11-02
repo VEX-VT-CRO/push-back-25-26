@@ -1,11 +1,11 @@
 #include "main.h"
+#include "Drivetrain.hpp"
 
 //CONSTANTS GO HERE
 constexpr int EXAMPLE_PORT = 5;
 
 //INITIALIZE SUBSYSTEMS HERE
 pros::Controller driver(pros::E_CONTROLLER_MASTER);
-Example flywheel(EXAMPLE_PORT);
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -64,22 +64,8 @@ void autonomous() {}
  */
 void opcontrol() {
 	while (true) {
-		//BEGIN FLYWHEEL CONTROL
-		// Spins forward when L1 is pressed, spins backward when L2 is pressed
-		if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-			flywheel.move();
-		}
-		else if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-			flywheel.move(Example::FLYWHEEL_SPEED, true);
-		}
-		else if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-			flywheel.move(Example::SPEED_SETTING::MEDIUM);
-		}
-		else {
-			flywheel.stop();
-		}
-		//END FLYWHEEL CONTROL
-
-		pros::delay(20);
-	}
+        int l = driver.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int r = driver.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+        pros::delay(20);
+    }
 }

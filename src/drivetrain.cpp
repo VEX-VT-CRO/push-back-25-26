@@ -20,14 +20,8 @@ Drivetrain drive(
     pros::E_MOTOR_BRAKE_BRAKE
 );
 
-void initialize() {
-    pros::lcd::initialize();
-}
 
-void opcontrol() {
-    while (true) {
-        int l = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int r = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
-        pros::delay(20);
-    }
-}
+
+
+
+
