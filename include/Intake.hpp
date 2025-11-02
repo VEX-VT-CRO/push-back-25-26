@@ -9,8 +9,8 @@
 // Intake expects one motor that drives the flywheel and one solenoid
 // which drives the expansion / collapse of the assembly
 class Intake {
-    // Change value based on testing. Speeds for flywheel on or off
-    enum SPEED_SETTING {OFF = 0, ON = 100};
+    // Change value based on testing. Speeds for flywheel off, forward, or reverse
+    enum SPEED_SETTING {OFF = 0, FORWARD = 100, REVERSE = -100};
 
     public:
         // Constructs a new Intake object
@@ -21,6 +21,9 @@ class Intake {
         // Spins the flywheel to intake blocks
         void Spin();
 
+        // Reverses the flywheel
+        void Reverse();
+
         // Stops the flywheel to allow pushing blocks
         void Stop();
 
@@ -29,6 +32,8 @@ class Intake {
 
         // Extend the pneumatic so intake can be collapsed
         void Extend();
+
+        // TODO: Add reverse to spin (automatic or manual)
 
     private:
         // The flywheel

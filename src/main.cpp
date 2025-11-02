@@ -1,11 +1,12 @@
 #include "main.h"
 
 //CONSTANTS GO HERE
-constexpr int EXAMPLE_PORT = 5;
+constexpr int INTAKE_FLYWHEEL_PORT = 5;
+constexpr char INTAKE_PNEUMATIC_PORT = 'A';
 
 //INITIALIZE SUBSYSTEMS HERE
 pros::Controller driver(pros::E_CONTROLLER_MASTER);
-Example flywheel(EXAMPLE_PORT);
+Intake intake(INTAKE_FLYWHEEL_PORT, INTAKE_PNEUMATIC_PORT);
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -16,6 +17,9 @@ Example flywheel(EXAMPLE_PORT);
 void initialize() {
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
+
+	// Retract the intake solenoid, expanding the intake assembly
+	intake.Retract();
 }
 
 /**
@@ -47,7 +51,9 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -63,23 +69,17 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+
 	while (true) {
-		//BEGIN FLYWHEEL CONTROL
-		// Spins forward when L1 is pressed, spins backward when L2 is pressed
-		if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-			flywheel.move();
-		}
-		else if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-			flywheel.move(Example::FLYWHEEL_SPEED, true);
-		}
-		else if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-			flywheel.move(Example::SPEED_SETTING::MEDIUM);
+		//BEGIN INTAKE CONTROL
+		// Spin the intake flywheel as long as 'B' is not pressed
+		// Change button assignment as needed
+		if (!driver.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+			intake.Spin();
 		}
 		else {
-			flywheel.stop();
+			intake.Stop();
 		}
-		//END FLYWHEEL CONTROL
-
 		pros::delay(20);
 	}
 }
