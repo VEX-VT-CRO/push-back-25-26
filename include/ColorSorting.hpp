@@ -1,9 +1,10 @@
-#ifndef __ColorSorting__
-#define __ColorSorting__
+#ifndef __COLORSORTING__
+#define __COLORSORTING__
 
 #include "motors.hpp"
 
-
+//Class looks at color of ball robot trys to pick and compares it to the color of the team the robot is assigned
+//expects motor port for the sorting motor; expects a value for the team color
 class ColorSorting {
     public: 
         //Used in .compare as a true or false--May change to boolean
@@ -40,7 +41,7 @@ class ColorSorting {
 
     private:
         //Sorting Motor
-        pros::Motor c_motor;   
+        pros::Motor c_motor_;   
 };
 
 
