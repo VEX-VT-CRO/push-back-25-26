@@ -1,16 +1,23 @@
 #include "ColorSorting.hpp"
 
 
-ColorSorting::ColorSorting(int port, int team) : c_motor_(port) {
+ColorSorting::ColorSorting(int port, const std::uint8_t o_port, int team) : c_motor_(port), color_optical_(o_port) {
     //intializes first motor on port
+    //intializes first sensor on optical port
 }
 
-//eventually will take camera data and compare it against the team value
+//take vex sensor data and compare it against the team value
+//if the sensor data reads high for red then assign value 1 to compareVal; Otherwise blue which is assigned 0
 //.accept and .reject depend on .compare
-//could potentially be another class depending on how big the function gets
-void ColorSorting::compare(int team) {
+int ColorSorting::compare(int team) {
+    redVal = color_optical_.get_rgb().red;
+    blueVal = color_optical_.get_rgb().blue;
+    if (redVal > 200)
+        compareVal = 1;
+    else
+        compareVal = 0;
     compareVal = (ballColor == team) ? 1 : 0;
-    std::cout << compareVal;
+    return compareVal;
 }
 
 //function to work withing .run
@@ -27,8 +34,7 @@ void ColorSorting::reject() {
 
 //allows to run all three functions within color sorting to get one output on the sorting motor
 void ColorSorting::run() {
-    compare(team);
-    if (compareVal == 1){
+    if (compare(team) == team){
         accept();
     }
     else {
