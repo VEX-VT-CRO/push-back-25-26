@@ -1,11 +1,12 @@
 #include "main.h"
+#include "ColorSorting.hpp"
 
 //CONSTANTS GO HERE
 constexpr int EXAMPLE_PORT = 5;
 
 //INITIALIZE SUBSYSTEMS HERE
 pros::Controller driver(pros::E_CONTROLLER_MASTER);
-Example flywheel(EXAMPLE_PORT);
+
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -63,20 +64,12 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	ColorSorting Sorter(1, 2, 1);
 	while (true) {
 		//BEGIN FLYWHEEL CONTROL
 		// Spins forward when L1 is pressed, spins backward when L2 is pressed
-		if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-			flywheel.move();
-		}
-		else if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-			flywheel.move(Example::FLYWHEEL_SPEED, true);
-		}
-		else if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-			flywheel.move(Example::SPEED_SETTING::MEDIUM);
-		}
-		else {
-			flywheel.stop();
+		if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+			Sorter.run();
 		}
 		//END FLYWHEEL CONTROL
 
