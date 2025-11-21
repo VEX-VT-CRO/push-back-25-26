@@ -40,6 +40,7 @@
  * You should add more #includes here
  */
 #include "Intake.hpp"
+#include "Outtake.hpp"
 
 /**
  * If you find doing pros::Motor() to be tedious and you'd prefer just to do

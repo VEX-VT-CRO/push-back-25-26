@@ -4,9 +4,12 @@
 constexpr int INTAKE_FLYWHEEL_PORT = 5;
 constexpr char INTAKE_PNEUMATIC_PORT = 'A';
 
+constexpr int OUTTAKE_FLYWHEEL_PORT = 6;
+
 //INITIALIZE SUBSYSTEMS HERE
 pros::Controller driver(pros::E_CONTROLLER_MASTER);
 Intake intake(INTAKE_FLYWHEEL_PORT, INTAKE_PNEUMATIC_PORT);
+Outtake outtake(OUTTAKE_FLYWHEEL_PORT);
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -75,6 +78,16 @@ void opcontrol() {
 		// Spin the intake flywheel as long as 'B' is not pressed
 		// Change button assignment as needed
 		if (!driver.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+			intake.Spin();
+		}
+		else {
+			intake.Stop();
+		}
+
+		// BEGIN OUTTAKE CONTROL
+		// Spin the outtake flywheel while 'A' is pressed
+		// Change button assignment to match conveyor motor
+		if (driver.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
 			intake.Spin();
 		}
 		else {
