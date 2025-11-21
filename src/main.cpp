@@ -1,5 +1,6 @@
 #include "main.h"
 #include "ColorSorting.hpp"
+#include "Conveyer.hpp"
 
 //CONSTANTS GO HERE
 constexpr int EXAMPLE_PORT = 5;
@@ -65,12 +66,19 @@ void autonomous() {}
  */
 void opcontrol() {
 	ColorSorting Sorter(1, 2, 1);
+	Conveyer Mover(2, 3);
 	while (true) {
 		//BEGIN FLYWHEEL CONTROL
 		// Spins forward when L1 is pressed, spins backward when L2 is pressed
 		if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
 			Sorter.run();
 		}
+		if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+			Mover.forward();
+		}
+		else
+			Mover.brake();
+
 		//END FLYWHEEL CONTROL
 
 		pros::delay(20);
