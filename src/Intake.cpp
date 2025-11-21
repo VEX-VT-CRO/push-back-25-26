@@ -1,6 +1,7 @@
 #include "Intake.hpp"
 
 // Running flywheel (s) "spin"
+// Reversing flywheel (s) "reverse"
 // Pneumatic that releases elastic to expand catching system "release"
 
 // Sets flywheel and pneumatic to the correct ports
