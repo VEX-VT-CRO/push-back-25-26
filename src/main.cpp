@@ -2,10 +2,31 @@
 #include "Drivetrain.hpp"
 
 //CONSTANTS GO HERE
-constexpr int EXAMPLE_PORT = 5;
+constexpr int FRONT_LEFT_PORT         = 2;
+constexpr int MIDDLE_FRONT_LEFT_PORT  = 3;
+constexpr int MIDDLE_BACK_LEFT_PORT   = 4;
+constexpr int BACK_LEFT_PORT          = 5;
+
+constexpr int FRONT_RIGHT_PORT        = 9;
+constexpr int MIDDLE_FRONT_RIGHT_PORT = 8;
+constexpr int MIDDLE_BACK_RIGHT_PORT  = 7;
+constexpr int BACK_RIGHT_PORT         = 6;
+
+constexpr int IMU_PORT = 10;
+constexpr int LEFT_ENCODER_PORT        = 1; 
+constexpr int RIGHT_ENCODER_PORT       = 2;
 
 //INITIALIZE SUBSYSTEMS HERE
 pros::Controller driver(pros::E_CONTROLLER_MASTER);
+
+Drivetrain drive(
+    FRONT_LEFT_PORT, MIDDLE_FRONT_LEFT_PORT, MIDDLE_BACK_LEFT_PORT, BACK_LEFT_PORT,
+    FRONT_RIGHT_PORT, MIDDLE_FRONT_RIGHT_PORT, MIDDLE_BACK_RIGHT_PORT, BACK_RIGHT_PORT,
+    IMU_PORT,
+    LEFT_ENCODER_PORT,
+    RIGHT_ENCODER_PORT,
+    pros::E_MOTOR_BRAKE_BRAKE
+);
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -16,6 +37,8 @@ pros::Controller driver(pros::E_CONTROLLER_MASTER);
 void initialize() {
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
+    drive.calibrate();
+    pros::lcd::set_text(1, "Init done");
 }
 
 /**
@@ -63,9 +86,13 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	while (true) {
-        int l = driver.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int r = driver.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
-        pros::delay(20);
+    while (true) {
+        int forward = driver.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int turn    = driver.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+
+        // arcade drive
+        drive.arcade(forward, turn, 15);
+
+        pros::delay(10);
     }
 }
