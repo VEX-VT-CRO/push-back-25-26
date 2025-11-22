@@ -1,13 +1,44 @@
 #include "main.h"
 #include "ColorSorting.hpp"
 #include "Conveyer.hpp"
+#include "Drivetrain.hpp"
 
 //CONSTANTS GO HERE
-constexpr int EXAMPLE_PORT = 5;
+constexpr int FRONT_LEFT_PORT         = 2;
+constexpr int MIDDLE_FRONT_LEFT_PORT  = 3;
+constexpr int MIDDLE_BACK_LEFT_PORT   = 4;
+constexpr int BACK_LEFT_PORT          = 5;
+
+constexpr int FRONT_RIGHT_PORT        = 9;
+constexpr int MIDDLE_FRONT_RIGHT_PORT = 8;
+constexpr int MIDDLE_BACK_RIGHT_PORT  = 7;
+constexpr int BACK_RIGHT_PORT         = 6;
+
+constexpr int IMU_PORT = 10;
+constexpr int LEFT_ENCODER_PORT        = 1; 
+constexpr int RIGHT_ENCODER_PORT       = 2;
 
 //INITIALIZE SUBSYSTEMS HERE
 pros::Controller driver(pros::E_CONTROLLER_MASTER);
 
+Drivetrain drive(
+    FRONT_LEFT_PORT, MIDDLE_FRONT_LEFT_PORT, MIDDLE_BACK_LEFT_PORT, BACK_LEFT_PORT,
+    FRONT_RIGHT_PORT, MIDDLE_FRONT_RIGHT_PORT, MIDDLE_BACK_RIGHT_PORT, BACK_RIGHT_PORT,
+    IMU_PORT,
+    LEFT_ENCODER_PORT,
+    RIGHT_ENCODER_PORT,
+    pros::E_MOTOR_BRAKE_BRAKE
+);
+constexpr int INTAKE_FLYWHEEL_PORT = 5;
+constexpr char INTAKE_PNEUMATIC_PORT = 'A';
+
+constexpr int OUTTAKE_FLYWHEEL_PORT = 6;
+
+//INITIALIZE SUBSYSTEMS HERE
+pros::Controller driver(pros::E_CONTROLLER_MASTER);
+
+Intake intake(INTAKE_FLYWHEEL_PORT, INTAKE_PNEUMATIC_PORT);
+Outtake outtake(OUTTAKE_FLYWHEEL_PORT);
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -18,6 +49,11 @@ pros::Controller driver(pros::E_CONTROLLER_MASTER);
 void initialize() {
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
+    drive.calibrate();
+    pros::lcd::set_text(1, "Init done");
+
+	// Retract the intake solenoid, expanding the intake assembly
+	intake.Retract();
 }
 
 /**
@@ -49,7 +85,9 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -81,6 +119,36 @@ void opcontrol() {
 
 		//END FLYWHEEL CONTROL
 
+    while (true) {
+        int forward = driver.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int turn    = driver.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+
+        // arcade drive
+        drive.arcade(forward, turn, 15);
+
+        pros::delay(10);
+    }
+
+	while (true) {
+		//BEGIN INTAKE CONTROL
+		// Spin the intake flywheel as long as 'B' is not pressed
+		// Change button assignment as needed
+		if (!driver.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+			intake.Spin();
+		}
+		else {
+			intake.Stop();
+		}
+
+		// BEGIN OUTTAKE CONTROL
+		// Spin the outtake flywheel while 'A' is pressed
+		// Change button assignment to match conveyor motor
+		if (driver.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+			intake.Spin();
+		}
+		else {
+			intake.Stop();
+		}
 		pros::delay(20);
 	}
 }
