@@ -27,6 +27,15 @@ Drivetrain drive(
     RIGHT_ENCODER_PORT,
     pros::E_MOTOR_BRAKE_BRAKE
 );
+constexpr int INTAKE_FLYWHEEL_PORT = 5;
+constexpr char INTAKE_PNEUMATIC_PORT = 'A';
+
+constexpr int OUTTAKE_FLYWHEEL_PORT = 6;
+
+//INITIALIZE SUBSYSTEMS HERE
+pros::Controller driver(pros::E_CONTROLLER_MASTER);
+Intake intake(INTAKE_FLYWHEEL_PORT, INTAKE_PNEUMATIC_PORT);
+Outtake outtake(OUTTAKE_FLYWHEEL_PORT);
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -39,6 +48,9 @@ void initialize() {
 	pros::lcd::set_text(1, "Hello PROS User!");
     drive.calibrate();
     pros::lcd::set_text(1, "Init done");
+
+	// Retract the intake solenoid, expanding the intake assembly
+	intake.Retract();
 }
 
 /**
@@ -70,7 +82,9 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -95,4 +109,27 @@ void opcontrol() {
 
         pros::delay(10);
     }
+
+	while (true) {
+		//BEGIN INTAKE CONTROL
+		// Spin the intake flywheel as long as 'B' is not pressed
+		// Change button assignment as needed
+		if (!driver.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+			intake.Spin();
+		}
+		else {
+			intake.Stop();
+		}
+
+		// BEGIN OUTTAKE CONTROL
+		// Spin the outtake flywheel while 'A' is pressed
+		// Change button assignment to match conveyor motor
+		if (driver.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+			intake.Spin();
+		}
+		else {
+			intake.Stop();
+		}
+		pros::delay(20);
+	}
 }

@@ -1,6 +1,7 @@
 #include "Intake.hpp"
 
 // Running flywheel (s) "spin"
+// Reversing flywheel (s) "reverse"
 // Pneumatic that releases elastic to expand catching system "release"
 
 // Sets flywheel and pneumatic to the correct ports
@@ -13,7 +14,11 @@ Intake::Intake(int flywheel_port, char pneumatic_port)
 
 // Sets the flywheel speed to the value of ON
 void Intake::Spin() {
-    this->flywheel_.move(ON);
+    this->flywheel_.move(FORWARD);
+}
+
+void Intake::Reverse() {
+    this->flywheel_.move(REVERSE);
 }
 
 // Sets flywheel speed to OFF (zero) to stop the spin
