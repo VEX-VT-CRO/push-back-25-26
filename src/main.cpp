@@ -71,7 +71,14 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {}
-
+    drive.calibrate();   
+    drive.setPose(0, 0, 0);      
+    drive.moveTo(0, 34, 1400);
+    drive.turnToHeading(12, 700);
+    drive.moveTo(6, 46, 1400);
+    drive.turnToHeading(175, 900);
+    drive.moveTo(6, 18, 1200);
+    drive.getChassis()->waitUntilSettled();
 /**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -89,7 +96,6 @@ void opcontrol() {
     while (true) {
         int forward = driver.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int turn    = driver.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-
         // arcade drive
         drive.arcade(forward, turn, 15);
 
