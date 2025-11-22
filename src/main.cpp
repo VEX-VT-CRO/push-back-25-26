@@ -2,7 +2,7 @@
 #include "Drivetrain.hpp"
 
 //CONSTANTS GO HERE
-constexpr int FRONT_LEFT_PORT         = 2;
+constexpr int FRONT_LEFT_PORT         = 2; 
 constexpr int MIDDLE_FRONT_LEFT_PORT  = 3;
 constexpr int MIDDLE_BACK_LEFT_PORT   = 4;
 constexpr int BACK_LEFT_PORT          = 5;
@@ -13,11 +13,10 @@ constexpr int MIDDLE_BACK_RIGHT_PORT  = 7;
 constexpr int BACK_RIGHT_PORT         = 6;
 
 constexpr int IMU_PORT = 10;
-constexpr int LEFT_ENCODER_PORT        = 1; 
-constexpr int RIGHT_ENCODER_PORT       = 2;
+constexpr int LEFT_ENCODER_PORT        = 11; 
+constexpr int RIGHT_ENCODER_PORT       = 12;
 
 //INITIALIZE SUBSYSTEMS HERE
-pros::Controller driver(pros::E_CONTROLLER_MASTER);
 
 Drivetrain drive(
     FRONT_LEFT_PORT, MIDDLE_FRONT_LEFT_PORT, MIDDLE_BACK_LEFT_PORT, BACK_LEFT_PORT,
@@ -29,8 +28,7 @@ Drivetrain drive(
 );
 constexpr int INTAKE_FLYWHEEL_PORT = 5;
 constexpr char INTAKE_PNEUMATIC_PORT = 'A';
-
-constexpr int OUTTAKE_FLYWHEEL_PORT = 6;
+constexpr int OUTTAKE_FLYWHEEL_PORT = 5; // checked
 
 //INITIALIZE SUBSYSTEMS HERE
 pros::Controller driver(pros::E_CONTROLLER_MASTER);
@@ -82,17 +80,44 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
+
 void autonomous() {
 
+    intake.Extend();   
+    intake.Stop();
+
+    drive.tank(-80, 80, 0);
+    pros::delay(750);
+
+    drive.tank(80, 80, 0);   
+    pros::delay(900);
+
+    drive.tank(90, 90, 0);
+    pros::delay(900);
+
+    intake.Extend();     
+    pros::delay(200);
+
+    drive.tank(-80, -80, 0);
+    pros::delay(700);
+
+    drive.tank(80, -80, 0);   
+    pros::delay(650);
+
+    drive.tank(90, 90, 0);
+    pros::delay(1100);
+
+    intake.Spin();
+    pros::delay(900);
+    intake.Stop();
+
+    drive.tank(-70, -70, 0);
+    pros::delay(600);
+
+    drive.tank(0, 0, 0);
 }
-    drive.calibrate();   
-    drive.setPose(0, 0, 0);      
-    drive.moveTo(0, 34, 1400);
-    drive.turnToHeading(12, 700);
-    drive.moveTo(6, 46, 1400);
-    drive.turnToHeading(175, 900);
-    drive.moveTo(6, 18, 1200);
-    drive.getChassis()->waitUntilSettled();
+
+
 /**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -108,15 +133,11 @@ void autonomous() {
  */
 void opcontrol() {
     while (true) {
-        int forward = driver.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int turn    = driver.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-        // arcade drive
-        drive.arcade(forward, turn, 15);
+        int leftPower  = driver.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int rightPower = driver.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+        drive.tank(leftPower, rightPower, 15); 
 
         pros::delay(10);
-    }
-
-	while (true) {
 		//BEGIN INTAKE CONTROL
 		// Spin the intake flywheel as long as 'B' is not pressed
 		// Change button assignment as needed
