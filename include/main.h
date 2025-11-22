@@ -39,6 +39,7 @@
 /**
  * You should add more #includes here
  */
+#include "ColorSorting.hpp"
 #include "lemlib/api.hpp"
 #include "Intake.hpp"
 #include "Outtake.hpp"

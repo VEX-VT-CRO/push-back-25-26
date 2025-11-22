@@ -1,4 +1,6 @@
 #include "main.h"
+#include "ColorSorting.hpp"
+#include "Conveyer.hpp"
 #include "Drivetrain.hpp"
 
 //CONSTANTS GO HERE
@@ -34,6 +36,7 @@ constexpr int OUTTAKE_FLYWHEEL_PORT = 6;
 
 //INITIALIZE SUBSYSTEMS HERE
 pros::Controller driver(pros::E_CONTROLLER_MASTER);
+
 Intake intake(INTAKE_FLYWHEEL_PORT, INTAKE_PNEUMATIC_PORT);
 Outtake outtake(OUTTAKE_FLYWHEEL_PORT);
 
@@ -100,6 +103,22 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	ColorSorting Sorter(1, 2, 1);
+	Conveyer Mover(2, 3);
+	while (true) {
+		//BEGIN FLYWHEEL CONTROL
+		// Spins forward when L1 is pressed, spins backward when L2 is pressed
+		if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+			Sorter.run();
+		}
+		if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+			Mover.forward();
+		}
+		else
+			Mover.brake();
+
+		//END FLYWHEEL CONTROL
+
     while (true) {
         int forward = driver.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int turn    = driver.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
