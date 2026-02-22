@@ -1,34 +1,16 @@
 #include "Drivetrain.hpp"
 #include "main.h"
-extern pros::Controller driver;
 
-// PID settings
-static const lemlib::ControllerSettings LINEAR_PID(
-    0.3, 0.0, 0.0,
-    100,
-    1,
-    10,
-    1.0,
-    0.0,
-    1.0
-);
-
-static const lemlib::ControllerSettings ANGULAR_PID(
-    4.0, 0.0, 0.0,
-    100,
-    1,
-    10,
-    180.0,
-    0.0,
-    180.0
-);
+// Note: we intentionally do NOT include or construct any sensors (IMU, Rotation, TrackingWheel, etc.)
+// This file provides a sensor-free drivetrain that only uses motors/motorgroups.
+// Movement functions that would require sensors (moveTo, turnToHeading, etc.) are left as no-ops.
 
 Drivetrain::Drivetrain(
     int fl, int mfl, int mbl, int bl,
     int fr, int mfr, int mbr, int br,
-    int imuPort,
-    int leftEncPort,
-    int rightEncPort,
+    int /*imuPort*/,
+    int /*leftEncPort*/,
+    int /*rightEncPort*/,
     pros::motor_brake_mode_e_t brakeMode
 )
     : frontLeft(fl)
@@ -44,29 +26,15 @@ Drivetrain::Drivetrain(
     , leftMotors({(int8_t)fl, (int8_t)mfl, (int8_t)mbl, (int8_t)bl})
     , rightMotors({(int8_t)fr, (int8_t)mfr, (int8_t)mbr, (int8_t)br})
 
-    , imu(imuPort)
-    , leftEnc(leftEncPort)
-    , rightEnc(rightEncPort)
-
-    , leftWheel(&leftEnc, 2.75, -5.0)
-    , rightWheel(&rightEnc, 2.75, 5.0)
-
-    , odomSensors(&leftWheel, &rightWheel, nullptr, nullptr, &imu)
-
-    , drivetrainCfg(&leftMotors, &rightMotors, 10.0f, 3.25f, 360.0f, 0.0f)
-
-    , chassis(drivetrainCfg, LINEAR_PID, ANGULAR_PID, odomSensors) // ✅ Correct
+    , chassis(nullptr)
 {
-    // Reverse right motors
+    // Reverse right motors to match mechanical wiring (keeps previous behavior)
     frontRight.set_reversed(true);
     middleFrontRight.set_reversed(true);
     middleBackRight.set_reversed(true);
     backRight.set_reversed(true);
 
-    // Reverse encoder directions if needed
-    leftEnc.set_reversed(true);
-    rightEnc.set_reversed(false);
-
+    // Set brake modes for motor groups
     leftMotors.set_brake_mode_all(brakeMode);
     rightMotors.set_brake_mode_all(brakeMode);
 }
@@ -74,36 +42,42 @@ Drivetrain::Drivetrain(
 // -----------------
 // Drive functions
 // -----------------
-void Drivetrain::tank(int leftPower, int rightPower, int deadband) {
-    chassis.tank(leftPower, rightPower, deadband);
+void Drivetrain::tank(int leftPower, int rightPower, int /*deadband*/) {
+    leftMotors.move(leftPower);
+    rightMotors.move(rightPower);
 }
 
-void Drivetrain::arcade(int forward, int turn, int deadband) {
-    chassis.arcade(forward, turn, deadband);
+void Drivetrain::arcade(int forward, int turn, int /*deadband*/) {
+    // simple arcade mixing to stay compatible with previous usage
+    int left = forward + turn;
+    int right = forward - turn;
+    leftMotors.move(left);
+    rightMotors.move(right);
 }
 
-void Drivetrain::setPose(float x, float y, float heading) {
-    chassis.setPose(x, y, heading);
+// -----------------
+// API-compatible no-ops for sensor functions
+// -----------------
+void Drivetrain::setPose(float /*x*/, float /*y*/, float /*heading*/) {
+    // NO-OP in sensor-free build
 }
 
-void Drivetrain::moveTo(float x, float y, int timeout) {
-    chassis.moveToPoint(x, y, timeout);
+void Drivetrain::moveTo(float /*x*/, float /*y*/, int /*timeout*/) {
+    // NO-OP in sensor-free build
 }
 
-void Drivetrain::turnToHeading(float heading, int timeout) {
-    chassis.turnToHeading(heading, timeout);
+void Drivetrain::turnToHeading(float /*heading*/, int /*timeout*/) {
+    // NO-OP in sensor-free build
 }
 
-void Drivetrain::turnToPoint(float x, float y, int timeout) {
-    chassis.turnToPoint(x, y, timeout);
+void Drivetrain::turnToPoint(float /*x*/, float /*y*/, int /*timeout*/) {
+    // NO-OP in sensor-free build
 }
 
 void Drivetrain::calibrate() {
-    imu.reset();
-    while (imu.is_calibrating()) pros::delay(10);
-    chassis.calibrate();
+    // NO-OP in sensor-free build (do not touch sensors)
 }
 
 lemlib::Chassis* Drivetrain::getChassis() {
-    return &chassis;
+    return nullptr; // keep return type stable for other code, but no chassis exists
 }

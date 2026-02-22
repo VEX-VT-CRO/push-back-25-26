@@ -1,154 +1,123 @@
 #include "main.h"
-#include "ColorSorting.hpp"
-#include "Conveyer.hpp"
 #include "Drivetrain.hpp"
+#include "Intake.hpp"
+#include "Outtake.hpp"
+#include "Conveyer.hpp"
 
-//CONSTANTS GO HERE
-constexpr int FRONT_LEFT_PORT         = 2;
-constexpr int MIDDLE_FRONT_LEFT_PORT  = 3;
-constexpr int MIDDLE_BACK_LEFT_PORT   = 4;
-constexpr int BACK_LEFT_PORT          = 5;
+// -----------------------------
+// CONSTANTS
+// -----------------------------
+constexpr int FRONT_LEFT_PORT         = -11;
+constexpr int MIDDLE_FRONT_LEFT_PORT  = 12;
+constexpr int MIDDLE_BACK_LEFT_PORT   = -13;
+constexpr int BACK_LEFT_PORT          = 14;
 
-constexpr int FRONT_RIGHT_PORT        = 9;
-constexpr int MIDDLE_FRONT_RIGHT_PORT = 8;
-constexpr int MIDDLE_BACK_RIGHT_PORT  = 7;
-constexpr int BACK_RIGHT_PORT         = 6;
+constexpr int FRONT_RIGHT_PORT        = 5;
+constexpr int MIDDLE_FRONT_RIGHT_PORT = -4;
+constexpr int MIDDLE_BACK_RIGHT_PORT  = -3;
+constexpr int BACK_RIGHT_PORT         = 2;
 
-constexpr int IMU_PORT = 10;
-constexpr int LEFT_ENCODER_PORT        = 1; 
-constexpr int RIGHT_ENCODER_PORT       = 2;
+// NO IMU, NO ENCODERS
+constexpr int IMU_PORT = -1;
+constexpr int LEFT_ENCODER_PORT  = -1;
+constexpr int RIGHT_ENCODER_PORT = -1;
 
-//INITIALIZE SUBSYSTEMS HERE
+// Intake / Outtake
+constexpr int INTAKE_PORT_1 = -
+
+10;
+constexpr int INTAKE_PORT_2 = 21;
+constexpr char INTAKE_PNEUMATIC_PORT = 'A';
+
+constexpr int OUTTAKE_FLYWHEEL_PORT = 20;
+
+// Conveyor motors
+constexpr int CONVEYOR_MOTOR_1 = 8;
+constexpr int CONVEYOR_MOTOR_2 = -6;
+
+// -----------------------------
+// SUBSYSTEMS
+// -----------------------------
 pros::Controller driver(pros::E_CONTROLLER_MASTER);
 
 Drivetrain drive(
     FRONT_LEFT_PORT, MIDDLE_FRONT_LEFT_PORT, MIDDLE_BACK_LEFT_PORT, BACK_LEFT_PORT,
     FRONT_RIGHT_PORT, MIDDLE_FRONT_RIGHT_PORT, MIDDLE_BACK_RIGHT_PORT, BACK_RIGHT_PORT,
-    IMU_PORT,
-    LEFT_ENCODER_PORT,
-    RIGHT_ENCODER_PORT,
+    0,   // IMU disabled
+    0,   // encoder dummy
+    0,   // encoder dummy
     pros::E_MOTOR_BRAKE_BRAKE
 );
-constexpr int INTAKE_FLYWHEEL_PORT = 5;
-constexpr char INTAKE_PNEUMATIC_PORT = 'A';
 
-constexpr int OUTTAKE_FLYWHEEL_PORT = 6;
-
-//INITIALIZE SUBSYSTEMS HERE
-pros::Controller driver(pros::E_CONTROLLER_MASTER);
-
-Intake intake(INTAKE_FLYWHEEL_PORT, INTAKE_PNEUMATIC_PORT);
+Intake intake(INTAKE_PORT_1, INTAKE_PORT_2, INTAKE_PNEUMATIC_PORT);
 Outtake outtake(OUTTAKE_FLYWHEEL_PORT);
+Conveyer conveyor(CONVEYOR_MOTOR_1, CONVEYOR_MOTOR_2);
 
-/**
- * Runs initialization code. This occurs as soon as the program is started.
- *
- * All other competition modes are blocked by initialize; it is recommended
- * to keep execution time for this mode under a few seconds.
- */
+// -----------------------------
+// INITIALIZE
+// -----------------------------
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-    drive.calibrate();
-    pros::lcd::set_text(1, "Init done");
+    pros::lcd::initialize();
+    pros::lcd::set_text(1, "Init...");
 
-	// Retract the intake solenoid, expanding the intake assembly
-	intake.Retract();
+
+    pros::lcd::set_text(1, "Init Complete");
 }
 
-/**
- * Runs while the robot is in the disabled state of Field Management System or
- * the VEX Competition Switch, following either autonomous or opcontrol. When
- * the robot is enabled, this task will exit.
- */
 void disabled() {}
-
-/**
- * Runs after initialize(), and before autonomous when connected to the Field
- * Management System or the VEX Competition Switch. This is intended for
- * competition-specific initialization routines, such as an autonomous selector
- * on the LCD.
- *
- * This task will exit when the robot is enabled and autonomous or opcontrol
- * starts.
- */
 void competition_initialize() {}
 
-/**
- * Runs the user autonomous code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the autonomous
- * mode. Alternatively, this function may be called in initialize or opcontrol
- * for non-competition testing purposes.
- *
- * If the robot is disabled or communications is lost, the autonomous task
- * will be stopped. Re-enabling the robot will restart the task, not re-start it
- * from where it left off.
- */
-void autonomous() {
 
+// -----------------------------
+// AUTON — NO SENSORS
+// -----------------------------
+void autonomous() {
+    
 }
 
-/**
- * Runs the operator control code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the operator
- * control mode.
- *
- * If no competition control is connected, this function will run immediately
- * following initialize().
- *
- * If the robot is disabled or communications is lost, the
- * operator control task will be stopped. Re-enabling the robot will restart the
- * task, not resume it from where it left off.
- */
+
+// -----------------------------
+// DRIVER CONTROL (TANK DRIVE)
+// -----------------------------
 void opcontrol() {
-	ColorSorting Sorter(1, 2, 1);
-	Conveyer Mover(2, 3);
-	while (true) {
-		//BEGIN FLYWHEEL CONTROL
-		// Spins forward when L1 is pressed, spins backward when L2 is pressed
-		if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-			Sorter.run();
-		}
-		if(driver.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
-			Mover.forward();
-		}
-		else
-			Mover.brake();
-
-		//END FLYWHEEL CONTROL
-
     while (true) {
-        int forward = driver.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int turn    = driver.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
-        // arcade drive
+        // ----------- TANK DRIVE -----------
+        int forward  = driver.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int turn = driver.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+
+
         drive.arcade(forward, turn, 15);
+
+        // ----------- OUTTAKE -----------
+        if (driver.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+            outtake.Spin();
+        } 
+        else {
+            outtake.Stop();
+        }
+
+
+        // ----------- CONVEYOR AND INTAKE -----------
+        // L1 = run intake + conveyor forward
+if (driver.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+    intake.Spin();
+    conveyor.upper_forward();
+    conveyor.lower_forward();
+}
+// R1 = reverse intake + conveyor
+else if (driver.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+    intake.Reverse();
+    conveyor.upper_reverse();
+    conveyor.lower_reverse();
+}
+else {
+    intake.Stop();
+    conveyor.upper_brake();
+    conveyor.lower_brake();
+}
+
 
         pros::delay(10);
     }
-
-	while (true) {
-		//BEGIN INTAKE CONTROL
-		// Spin the intake flywheel as long as 'B' is not pressed
-		// Change button assignment as needed
-		if (!driver.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
-			intake.Spin();
-		}
-		else {
-			intake.Stop();
-		}
-
-		// BEGIN OUTTAKE CONTROL
-		// Spin the outtake flywheel while 'A' is pressed
-		// Change button assignment to match conveyor motor
-		if (driver.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-			intake.Spin();
-		}
-		else {
-			intake.Stop();
-		}
-		pros::delay(20);
-	}
 }
